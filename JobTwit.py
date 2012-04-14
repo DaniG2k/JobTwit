@@ -1,8 +1,7 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
  
-import urllib
-import simplejson
+import urllib, simplejson
 
 """
 Twitter job search for programmers
@@ -12,45 +11,61 @@ Date: mid-April 2012
 """
 
 t = {}			# Dictionary of Tweets
-pages = '3'		# The number of pages of tweets we want to inspect
-rpp = '100'		# Results per page
 
 q = ['PHP', 'Python', 'Java',
 	'Objective C', 'C', 'C++', 'C#',
-	'SQL', 'Android', 'Ruby', 'JavaScript',
-	'Action Script', 'ASP']
+	'SQL', 'MySQL', 'Android', 'Ruby',
+	'JavaScript', 'Action Script', 'ASP']
 
 links = []		# The links within the tweets
 
-def searchTweets(query):
-	search = urllib.urlopen("http://search.twitter.com/search.json?q=Job%20"+query+'&rpp='+rpp+'&page='+pages)
-	dict = simplejson.loads(search.read())
-	for result in dict["results"]: # Result is a list of dictionaries
-		floatTweets(result['text'], result['from_user'])
+def parseTweets(query):
+	seed = "http://search.twitter.com/search.json?q=Job%20"
+	pages = 3		# The number of pages we inspect (max 15)
+	rpp = 100		# The number of results per page we inspect (max 100)
+	rtype = '&result_type=mixed'
+	while pages >= 1:
+		search = urllib.urlopen(seed+query+'&rpp='+str(rpp)+'&page='+str(pages)+rtype)
+		dict = simplejson.loads(search.read())
+		for result in dict["results"]: # Result is a list of dictionaries
+			groupTweets(result['text'], result['from_user'])
+		pages -= 1
 	c = 0
 	for k in t:
 		if 'http' in k:
 			get_urls(k)
 		if t[k][0] == 1:
 			print t[k][0],'Tweet)'
-			print '\t\033[1;32m%s\033[1;m' % k
+			print '\t' + green(k)
 			c += 1
 		else:
 			print t[k][0],'Tweets)'
-			print '\t\033[1;32m%s\033[1;m' % k
+			print '\t' + green(k)
 			c += t[k][0]
 		if len(t[k][1]) == 1:
-			print '\t\033[1;33mUser:',t[k][1],'\033[1;m\n'
+			print '\t' + yellow('User:') + yellow(t[k][1]) + '\n'
 		else:
-			print '\t\033[1;33mUsers:',t[k][1],'\033[1;m\n'
-	print 'Query: \033[1;31m%s\033[1;m' % query
-	print 'Total tweets scanned:',c # This number is not necessarily the same as
-									# the number entered in variable qnum. Sometimes
-									# there simply aren't that many tweets to scan.
+			print '\t' + yellow('Users:') + yellow(t[k][1]) + '\n'
+	print 'Query: ' + red(query)
+	print 'Total tweets scanned:',c
+
+# Prettify :D
+def green(s):
+	return '\033[1;32m%s\033[1;m' % s
+
+def yellow(s):
+	return '\033[1;33m%s\033[1;m' % s
+
+def red(s):
+	return '\033[1;31m%s\033[1;m' % s
+
+def clear():
+	print('\x1B[2J')
+
 
 # This function groups identical Tweets to avoid having them being 
 # reprinted on the screen.
-def floatTweets(tweet, user):
+def groupTweets(tweet, user):
 	if tweet in t:
 		t[tweet][0] += 1
 		t[tweet][1].append(user)
@@ -61,7 +76,7 @@ def floatTweets(tweet, user):
 # Validate user input.
 def check_lang(n):
 	n -= 1
-	prompt = 'Enter a number from 1 to %s:\n--->' % n
+	prompt = 'Enter a number from 1 to %s:\n---> ' % n
 	while True:
 		try:
 			i = int(raw_input(prompt))
@@ -73,55 +88,57 @@ def check_lang(n):
 def check_location():
 	print '\nWould you like to specify a location? (ex. NYC, London)'
 	print '1) No\n2) Yes'
-	prompt = '--->'
+	prompt = '---> '
 	while True:
 		try:
 			i = int(raw_input(prompt))
 			if i == 1:
 				return ''
 			elif i == 2:
-				s = 'What location should be searched?\n--->'
-				near = '&near:'
+				s = 'What location should be searched?\n---> '
 				loc = str(raw_input(s))
-				loc = near + loc
 				return loc
 			else:
 				print 'Only a value of 1 oe 2 is accepted here.'
 		except ValueError:
 			print 'Only a value of 1 or 2 is accepted here.'
 
-def scan_urls(l):
-	print '\n\nI\'ve collected a \033[1;32mlist of ' + str(len(links)) + ' URLs\033[1;m from the above Tweets'
-	print '\nI can tell you the page title and give a brief description.'
-	print 'Would you like me to look through the collected URLs?'
-	print '1) No\n2) Yes'
-	prompt = '--->'
-	while True:
-		try:
-			i = int(raw_input(prompt))
-			if i == 1:
-				break
-			elif i == 2:
-				print 'Ok! Scanning...'
-				c = 1
-				for e in l:
-					print '\n' + str(c) + '/' + str(len(l)) + ')'
-					c += 1
-					handle = urllib.urlopen(e)
-					page = handle.read()
-					if '<title>' in page:
-						t_start_pos = page.find('<title>')
-						t_end_pos = page.find('</title>')
-						title = page[t_start_pos + len('<title>'):t_end_pos]
-						title.strip(' \t\n\r')
-						print '\033[1;31mTitle: \033[1;m' + title
-					handle.close()
-					print '\033[1;33mURL:\033[1;m ' + e
-				return False
-			else:
-				print 'Only a value of 1 oe 2 is accepted here.'
-		except ValueError:
-			print 'Only a value of 1 or 2 is accepted here.'
+def crawl_urls(l):
+	list_length = len(l)
+	if list_length > 0:
+		print '\n\nI\'ve collected a \033[1;32mlist of ' + str(list_length) + ' links\033[1;m from the above Tweets'
+		print '\nI can tell you more about them.'
+		print 'Would you like me to look through the collected URLs?'
+		print '1) No\n2) Yes'
+		prompt = '---> '
+		while True:
+			try:
+				i = int(raw_input(prompt))
+				if i == 1:
+					print 'Exiting!'
+					break
+				elif i == 2:
+					print 'Ok! Scanning...'
+					counter = 1
+					total = str(len(l))
+					for e in l:
+						print '\n' + str(counter) + '/' + total + ')'
+						counter += 1
+						handle = urllib.urlopen(e)
+						page = handle.read()
+						if '<title>' in page:
+							t_start_pos = page.find('<title>')
+							t_end_pos = page.find('</title>')
+							title = page[t_start_pos + len('<title>'):t_end_pos]
+							title.strip(' \t\n\r')
+							print red('Title: ') + title
+						handle.close()
+						print yellow('URL: ') + e
+					return False
+				else:
+					print 'Only a value of 1 or 2 is accepted here.'
+			except ValueError:
+				print 'Only a value of 1 or 2 is accepted here.'
 
 # Make a list of all the URLs in the tweets we found
 def get_urls(s):
@@ -142,8 +159,9 @@ def prompt():
 	if loc == '':
 		query = q[num]
 	else:
-		query = q[num] + loc
-	searchTweets(query)
-	scan_urls(links)
+		query = q[num] + ' ' + loc
+	parseTweets(query)
+	crawl_urls(links)
 
+clear()
 prompt()
