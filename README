@@ -2,7 +2,7 @@ This is JobTwit. It's awesome. It will find you a job.
 
 JobTwit does the following:
 1) Prompts the user to select a programming language
-2) Asks if a location should be specified
+2) Asks if a geo-location should be specified
 3) Retrieves the Tweets and displays them
 
 Optionally, the user can then choose to:
