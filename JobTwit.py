@@ -45,7 +45,7 @@ def parseTweets(query):
 		else:
 			print '\t' + yellow('Users:') + yellow(t[k][1]) + '\n'
 	print 'Query: ' + red(query)
-	print 'Total tweets scanned:' + red(c)
+	print 'Total tweets scanned: ' + red(c)
 
 # Prettify :D
 def green(s):
@@ -174,6 +174,5 @@ def prompt():
 		query = q[num] + ' ' + loc
 	parseTweets(query)
 	crawl_urls(links)
-
 clear()
 prompt()
