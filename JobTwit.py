@@ -10,19 +10,17 @@ License: Creative Commons CC BY-NC-SA license
 Date: mid-April 2012
 """
 
-t = {}			# Dictionary of Tweets
-
 q = ['PHP', 'Python', 'Java',
 	'Objective C', 'C', 'C++', 'C#',
 	'SQL', 'MySQL', 'Android', 'Ruby',
 	'JavaScript', 'Action Script', 'ASP']
-
+t = {}			# Dictionary of Tweets
 links = []		# The links within the tweets
 
 def parseTweets(query):
 	seed = "http://search.twitter.com/search.json?q=Job%20"
-	pages = 3		# The number of pages we inspect (max 15)
-	rpp = 100		# The number of results per page we inspect (max 100)
+	pages = npages()	# The number of pages we inspect (max 15)
+	rpp = 100			# The number of results per page we inspect (max 100)
 	rtype = '&result_type=mixed'
 	while pages >= 1:
 		search = urllib.urlopen(seed+query+'&rpp='+str(rpp)+'&page='+str(pages)+rtype)
@@ -47,7 +45,7 @@ def parseTweets(query):
 		else:
 			print '\t' + yellow('Users:') + yellow(t[k][1]) + '\n'
 	print 'Query: ' + red(query)
-	print 'Total tweets scanned:',c
+	print 'Total tweets scanned:' + red(c)
 
 # Prettify :D
 def green(s):
@@ -84,6 +82,20 @@ def check_lang(n):
 				return i
 		except ValueError:
 			print 'Only a number from 1 to',n,'can be input.'
+
+def npages():
+	print '\nHow many pages of Tweets should I scan?'
+	print 'Maximum is 15 pages (1500 Tweets)'
+	prompt = '---> '
+	while True:
+		try:
+			i = int(raw_input(prompt))
+			if i > 15 or i < 1:
+				print 'I can only scan 1 to 15 pages of Tweets.'
+			else:
+				return i
+		except ValueError:
+			print 'Only a value from 1 to 15 is accepted here.'
 
 def check_location():
 	print '\nWould you like to specify a location? (ex. NYC, London)'
@@ -146,7 +158,7 @@ def get_urls(s):
 	for e in l:
 		if 'http' in e:
 			links.append(e)
-	
+
 # Prompt the user for the Tweets to search for.
 def prompt():
 	print 'What language would you like to search for?'
