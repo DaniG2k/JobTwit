@@ -29,9 +29,15 @@ On the main screen, you are presented with three options:
 
 Number 1 will get a list of Tweets and list the languages by job postings and popularity.
 
-Number 2 will prompt the user for a particular programming language. It will then ask the user if he/she would like to specify a geolocation. It subsequently runs the query on Twitter and finds all the tweets that match the query. The user can then decide whether to learn more about the collected urls that are within those tweets by crawling each page. The pages are scanned one by one and the url as well as the page's title are returned.
+Number 2 will prompt the user for a particular programming language. It will then ask the user if he/she would like
+to specify a geolocation. It subsequently runs the query on Twitter and finds all the tweets that match the query.
+The user can then decide whether to learn more about the collected urls that are within those tweets by crawling
+each page. The pages are scanned one by one and the url as well as the page's title are returned.
 
-Number 3 is a combination of number 1 and number 2. The most popular programming language is first established, then passed as a parameter to the function that makes you look at the tweets more in depth (along with the urls they point to)
+Number 3 is a combination of number 1 and number 2. The most popular programming language is first established,
+then passed as a parameter to the function that makes you look at the tweets more in depth (along with the urls
+they point to)
 
 Note:
-If you change the 'pages' variable in the getTweets method, the program will scan more Twitter results. Allowed values are 1-15.
+If you change the 'pages' variable in the getTweets method, the program will scan more Twitter results. Allowed
+values are 1-15.
