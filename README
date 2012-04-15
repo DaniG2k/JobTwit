@@ -1,16 +1,12 @@
-This is JobTwit. It's awesome. It will find you a job.
+This is JobTwit! It's awesome. It will find you a job.
 
 
-JobTwit does the following:
-1) Prompts the user to select a programming language
-2) Asks if a geo-location should be specified
-3) Retrieves all Tweets and displays them!
+JobTwit intelligently scans Twitter for job postings, just:
 
-
-Optionally, the user can then choose to:
-1) See EVERY url that was listed in those Tweets
-2) Read the title of the page the url referred to
+1) Run JobTwit
+2) Follow the on-screen instructions.
 3) Done! JobTwit just helped you find your dream job :)
+
 
 Released under CC Lincese v3
 

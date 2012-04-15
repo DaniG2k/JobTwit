@@ -19,10 +19,15 @@ t = {}			# Dictionary of Tweets
 links = []		# The links within the tweets
 
 def getTweets(q):
+	#################
+	pages = 3		# The number of pages we inspect (max is 15).
+					# CHANGE THIS VALUE TO GET MORE RESULTS
+					# More pages will result in longer processing time.
+	################# It will also put more strain on Twitter's servers.
+	
 	seed = "http://search.twitter.com/search.json?q=Job%20"
+	rpp = 100		# The number of results per page we inspect (max 100)
 	rtype = '&result_type=mixed'
-	pages = npages()	# The number of pages we inspect (max 15)
-	rpp = 100			# The number of results per page we inspect (max 100)
 	while pages >= 1:
 		search = urllib.urlopen(seed+q+'&rpp='+str(rpp)+'&page='+str(pages)+rtype)
 		dict = simplejson.loads(search.read())
@@ -55,18 +60,23 @@ def lang_stats():
 				c += 1
 		stats[lang] = c
 	totaljobs = 0
+	pop_count = 0
+	pop_name = ''
 	for key in stats:
 		totaljobs += stats[key]
+		if pop_count <= stats[key]:
+			pop_count = stats[key]
+			pop_name = key
 	print '\nEstimated Popularity:'
 	for key, val in sorted(stats.iteritems(), key=lambda (k,v): (v,k)):
 		popularity = round(val / float(totaljobs) * 100, 2)
-		if popularity < 10:
-			if len(str(popularity)) >= 4:
+		if len(str(popularity)) <= 4:
 				tabs = '\t\t'
 		else:
 			tabs = '\t'
 		print '(' + red(str(popularity)) + '%)' + tabs + yellow(key) + \
 		' = ' + green(str(val)) + ' jobs'
+	return pop_name
 
 def parseTweets(query):
 	getTweets(query)
@@ -113,21 +123,6 @@ def check_lang(n):
 				return i
 		except ValueError:
 			print 'Only a number from 1 to',n,'can be input.'
-
-def npages():
-	print '\nHow many pages of Tweets should I scan?'
-	print 'Maximum is 15 pages (1500 Tweets)'
-	prompt = '---> '
-	while True:
-		try:
-			i = int(raw_input(prompt))
-			if i > 15 or i < 1:
-				print 'I can only scan 1 to 15 pages of Tweets.'
-			else:
-				return i
-		except ValueError:
-			print 'Only a value from 1 to 15 is accepted here.'
-		
 
 def check_location():
 	print '\nWould you like to specify a location? (ex. NYC, London)'
@@ -192,40 +187,44 @@ def get_urls(s):
 		if 'http' in e:
 			links.append(e)
 
-
-
 # Prompt the user for the Tweets to search for.
-def prompt():
+def main_prompt():
 	print green('\t\t\tWelcome to JobTwit! :D')
 	print '\nWould you like to:'
-	print '1) Query Twitter for a particlar programming language\n' + \
-	'2) View general statistics'
+	print '\n1) View the general statistics\n' + \
+	'2) Query Twitter for a particlar programming language\n' + \
+	'3) Query Twitter for the most popular programming language'
 	prompt = '---> '
 	while True:
 		try:
 			i = int(raw_input(prompt))
 			if i == 1:
-					print 'What language would you like to search for?'
-					i = 1
-					for entry in q:
-						print i,')',entry
-						i += 1
-					num = check_lang(i) - 1
-					loc = check_location()
-					if loc == '':
-						query = q[num]
-					else:
-						query = q[num] + ' ' + loc
-					parseTweets(query)
-					crawl_urls(links)
-					break
-			elif i == 2:
 				lang_stats()
-				break
+				return False
+			elif i == 2:
+				print 'What language would you like to search for?'
+				c = 1
+				for entry in q:
+					print c,')',entry
+					c += 1
+				num = check_lang(c) - 1
+				loc = check_location()
+				if loc == '':
+					query = q[num]
+				else:
+					query = q[num] + ' ' + loc
+				parseTweets(query)
+				crawl_urls(links)
+				return False
+			elif i == 3:
+				query = lang_stats()
+				parseTweets(query)
+				crawl_urls(links)
+				return False
 			else:
 				print 'Only a value of 1 oe 2 is accepted here.'
 		except ValueError:
 			print 'Only a value of 1 or 2 is accepted here.'
 
 clear()
-prompt()
+main_prompt()
